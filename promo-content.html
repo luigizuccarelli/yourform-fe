@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+    <meta charset="utf-8"> <!-- utf-8 works for most cases -->
+    <meta name="viewport" content="width=device-width"> <!-- Forcing initial-scale shouldn't be necessary -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"> <!-- Use the latest (edge) version of IE rendering engine -->
+    <meta name="x-apple-disable-message-reformatting">  <!-- Disable auto-scale in iOS 10 Mail entirely -->
+    <title>Promo Page</title> <!-- The title tag shows in email notifications, like Android 4.4. -->
+
+    <script>
+
+      var payload = {
+      "rows": [
+        [ 
+          117,
+          "No",
+          0,
+          180.0,
+          30.0,
+          20.0,
+          5.0,
+          10.0,
+          2.0,
+          17.5,
+          4.0,
+          20.0,
+          17.50,
+          5.0,
+          "False"
+        ]
+      ],
+      "schema": {
+          "fields": [
+              {
+                  "type": "integer",
+                  "name": "len"
+              },
+              {
+                  "type": "string",
+                  "name": "intlplan"
+              },
+              {
+                  "type": "double",
+                  "name": "numvmail"
+              },
+              {
+                  "type": "double",
+                  "name": "tdmins"
+              },
+              {
+                  "type": "double",
+                  "name": "tdcalls"
+              },
+              {
+                  "type": "double",
+                  "name": "temins"
+              },
+              {
+                  "type": "double",
+                  "name": "tecalls"
+              },
+              {
+                  "type": "double",
+                  "name": "tnmins"
+              },
+              {
+                  "type": "double",
+                 "name": "tncalls"
+              },
+              {
+                 "type": "double",
+                 "name": "tncharge"
+              },
+              {
+                 "type": "double",
+                 "name": "timins"
+              },
+              {
+                 "type": "double",
+                 "name": "ticalls"
+              },
+              {
+                 "type": "double",
+                 "name": "ticharge"
+              },
+              {
+                 "type": "double",
+                 "name": "numcs"
+              },
+              {
+                 "type": "string",
+                 "name": "churn"
+              }
+            ]
+          }
+        };
+
+
+        function getMLData() {
+           var baseIp = "mleap-route-yourform.apps.threefold.x1l7.p1.openshiftapps.com/";
+        
+          console.log("Getting prediction data");
+          console.log("JSON payload", JSON.stringify(payload));
+
+          var xhttp = new XMLHttpRequest();
+          xhttp.open("POST", "https://" + baseIp + "models/churn-mleap/transform" , true);
+          xhttp.setRequestHeader("Content-Type", "application/json");
+          xhttp.setRequestHeader("timeout", "1000");
+
+          xhttp.send(JSON.stringify(payload));
+          let arr = [];
+
+          xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+              let json = JSON.parse(this.responseText);
+              //console.log(json);
+              if (json.rows[0][19].values[0] >= 0.8) {
+                var ml = document.getElementById("Winback")
+                ml.style.display = "block";
+              }
+            }
+          }
+        }
+
+
+
+       function getContent() {
+        var baseIp = "cdn.contentful.com/spaces/sil3zm1l2d5y/entries?access_token=-d45SgzyRxHhrYwTZSdJjLyN7hopxedLtc3iguHo87A&include=3";
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("GET", "https://" + baseIp, true);
+        xhttp.setRequestHeader("Content-Type", "application/json");
+        xhttp.send();
+        xhttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+            let json = JSON.parse(this.responseText);
+
+            console.log(json.items[0].fields);
+            updateDom(json,"Headline");
+            updateDom(json,"Subheadline");
+            updateDom(json,"InterestStatement_A");
+            updateDom(json,"InterestStatement_B");
+            updateDom(json,"Proof_A");
+            updateDom(json,"Proof_B");
+            updateDom(json,"Proof_C");
+            updateDom(json,"Contradiction_handle");
+            updateDom(json,"Quote");
+            updateDom(json,"Button_A");
+            updateDomSrc(json,"Video_A");
+            updateDomSrc(json,"Video_B");
+            updateDomSrc(json,"Audio");
+          }
+        }
+      }
+
+      function updateDom(obj,component) {
+        var c = document.getElementById(component);
+        let s = "";
+        switch(component) {
+          case "Headline":
+          s = obj.items[0].fields.Headline; 
+          break;
+          case "Subheadline":
+          s = obj.items[0].fields.Subheadline;
+          break;
+          case "InterestStatement_A":
+          s = obj.items[0].fields.InterestStatement_A; 
+          break;
+          case "InterestStatement_B":
+          s = obj.items[0].fields.InterestStatement_B; 
+          break;
+          case "Proof_A":
+          s = obj.items[0].fields.Proof_A; 
+          break;
+          case "Proof_B":
+          s = obj.items[0].fields.Proof_B; 
+          break;
+          case "Proof_C":
+          s = obj.items[0].fields.Proof_C; 
+          break;
+          case "Contradiction_handle":
+          s = obj.items[0].fields.Contradiction_handle; 
+          break;
+          case "Quote":
+          s = obj.items[0].fields.Quote; 
+          break;
+          case "Summary":
+          s = obj.items[0].fields.Summary; 
+          break;
+          case "Button_A":
+          s = obj.items[0].fields.Button_A; 
+          break;
+          
+          default:
+        }
+        var res = s.replace(/\n/g, '<br />');
+        c.innerHTML = res;
+      }
+
+      function updateDomSrc(obj,component) {
+        var c = document.getElementById(component);
+        let s = "";
+        switch(component) {
+          case "Video_A":
+          s = obj.items[0].fields.Video_A; 
+          break;
+           case "Video_B":
+          s = obj.items[0].fields.Video_B; 
+          break;
+          case "Audio":
+          s = obj.items[0].fields.Audio; 
+          break;
+          default:
+        }
+        c.src = s;
+      }
+
+      function getData() {
+        var baseIp = "secure-yourform-backend-yourform.apps.threefold.x1l7.p1.openshiftapps.com/";
+        var url = location.href;
+        var htmlValued = "";
+        var param = url.lastIndexOf("?")
+
+        console.log("https://" + baseIp + "api/user/"+url.substring(param+1));
+        var id = url.substring(param+1);
+        if (param === -1) {
+          id = 1;
+        }
+
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("GET", "https://" + baseIp + "api/user/"+id, true);
+        xhttp.setRequestHeader("Content-Type", "application/json");
+        xhttp.send();
+        let arr = [];
+
+        xhttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+            let json = JSON.parse(this.responseText);
+            console.log("LMZ ",json);
+
+            var ml = document.getElementById("Winback")
+            ml.style.display = "none";
+
+
+            // user 4
+            if (json.shortAudioPastViewTimeSeconds >= 5) {
+              var btnA = document.getElementById("Button_A");
+              btnA.style.display = "block";
+              //var btnB = document.getElementById("Button_B");
+              //btnB.style.display = "none";
+              var ch = document.getElementById("Contradiction_handle");
+              ch.style.display = "none";
+              var svA = document.getElementById("Video_A");
+              svA.style.display = "none";
+              var svB = document.getElementById("Video_B");
+              svB.style.display = "none";
+              var isA = document.getElementById("InterestStatement_A");
+              isA.style.display = "none";
+              var isB = document.getElementById("InterestStatement_B");
+              isB.style.display = "none";
+              var pA = document.getElementById("Proof_A");
+              pA.style.display = "none";
+              var pB = document.getElementById("Proof_B");
+              pB.style.display = "none";
+              var pC = document.getElementById("Proof_C");
+              pC.style.display = "none";
+              var audio = document.getElementById("Audio");
+              audio.style.display = "block";
+              var quote = document.getElementById("Quote");
+              quote.style.display = "none";
+              var summary = document.getElementById("Summary");
+              summary.style.display = "none";
+              payload.rows = json.rows;
+              payload.schema = json.schema;
+            }
+
+            //user 3
+            if (json.shortVideoPastViewTimeSeconds >= 5) {
+              var btnA = document.getElementById("Button_A");
+              btnA.style.display = "block";
+              //var btnB = document.getElementById("Button_B");
+              //btnB.style.display = "none";
+              var ch = document.getElementById("Contradiction_handle");
+              ch.style.display = "none";
+              var svA = document.getElementById("Video_A");
+              svA.style.display = "none";
+              var svB = document.getElementById("Video_B");
+              svB.style.display = "block";
+              var isA = document.getElementById("InterestStatement_A");
+              isA.style.display = "none";
+              var isB = document.getElementById("InterestStatement_B");
+              isB.style.display = "none";
+              var pA = document.getElementById("Proof_A");
+              pA.style.display = "none";
+              var pB = document.getElementById("Proof_B");
+              pB.style.display = "none";
+              var pC = document.getElementById("Proof_C");
+              pC.style.display = "none";
+              var audio = document.getElementById("Audio");
+              audio.style.display = "none";
+              var quote = document.getElementById("Quote");
+              quote.style.display = "block";
+              var summary = document.getElementById("Summary");
+              summary.style.display = "block";
+              payload.rows = json.rows;
+              payload.schema = json.schema;
+
+            }
+
+            // user 2
+            if (json.shortContentPastViewTimeSeconds >= 2) {
+              var btnA = document.getElementById("Button_A");
+              btnA.style.display = "block";
+              //var btnB = document.getElementById("Button_B");
+              //btnB.style.display = "none";
+              var ch = document.getElementById("Contradiction_handle");
+              ch.style.display = "none";
+              var svA = document.getElementById("Video_A");
+              svA.style.display = "none";
+              var svB = document.getElementById("Video_B");
+              svB.style.display = "block";
+              var isA = document.getElementById("InterestStatement_A");
+              isA.style.display = "none";
+              var isB = document.getElementById("InterestStatement_B");
+              isB.style.display = "block";
+              var pA = document.getElementById("Proof_A");
+              pA.style.display = "none";
+              var pB = document.getElementById("Proof_B");
+              pB.style.display = "none";
+              var pC = document.getElementById("Proof_C");
+              pC.style.display = "none";
+              var audio = document.getElementById("Audio");
+              audio.style.display = "none";
+              var quote = document.getElementById("Quote");
+              quote.style.display = "block";
+              var summary = document.getElementById("Summary");
+              summary.style.display = "block";
+              payload.rows = json.rows;
+              payload.schema = json.schema;
+
+            }
+
+            // user 1
+            if (json.longContentPastViewTimeSeconds > 1) {
+              var btnA = document.getElementById("Button_A");
+              btnA.style.display = "block";
+              //var btnB = document.getElementById("Button_B");
+              //btnB.style.display = "none";
+              var ch = document.getElementById("Contradiction_handle");
+              ch.style.display = "none";
+              var svA = document.getElementById("Video_A");
+              svA.style.display = "block";
+              var svB = document.getElementById("Video_B");
+              svB.style.display = "none";
+              var isA = document.getElementById("InterestStatement_A");
+              isA.style.display = "block";
+              var isB = document.getElementById("InterestStatement_B");
+              isB.style.display = "block";
+              var pA = document.getElementById("Proof_A");
+              pA.style.display = "block";
+              var pB = document.getElementById("Proof_B");
+              pB.style.display = "block";
+              var pC = document.getElementById("Proof_C");
+              pC.style.display = "block";
+              var audio = document.getElementById("Audio");
+              audio.style.display = "none";
+              var quote = document.getElementById("Quote");
+              quote.style.display = "block";
+              var summary = document.getElementById("Summary");
+              summary.style.display = "block";
+              payload.rows = json.rows;
+              payload.schema = json.schema;
+            }
+
+            getMLData();
+
+            getContent();
+            
+          }
+        }
+      }
+
+    </script>
+
+ <body onload="getData();" style="margin: 0 auto">
+  <div style="width: 100%; margin: 0 auto;">
+  <div class="header">
+    <img
+      style="width: 100%;"
+      src="https://images.ctfassets.net/sil3zm1l2d5y/5GT8JP24vT8LHNKwqkNTK3/07b0cbd9a1b13bbe62726c53ca0a7801/navbar.png"
+    />
+  </div>
+  <div
+    class="content"
+    style="max-width:950px; font-family: Baskerville; width: 100%; padding: 0px; margin: 0 auto; line-height: 22px; font-size: 16px;"
+  >
+    <h1
+      id="Headline"
+      style="padding: 30px; font-weight: 700; text-align: center; font-size: 32px; line-height: 38px;"
+    >
+    </h1>
+    <div>
+      <img
+        style="text-align: center; width: 100%;"
+        id="Header_img"
+        src="https://images.ctfassets.net/sil3zm1l2d5y/6BZE19sELS7QUjkkxYNoBG/bd94f651c67ce137df94d75acd055754/header.jpg"
+      />
+    </div>
+    <h2
+      style="font-size: 24px; font-weight: 500; color: #3B4A50; line-height: 28px; padding: 15px 5%;"
+      id="Subheadline"
+    >
+    </h2>
+    <div style="padding: 10px 5%" id="InterestStatement_A">
+    </div>
+    <div style="padding: 10px 5%" id="InterestStatement_B"></div>
+    <div style="padding: 10px 5%" id="Proof_A"></div>
+    <div style="padding: 10px 5%" id="Proof_B"></div>
+    <div style="padding: 10px 5%" id="Proof_C"></div>
+    <div>
+      <img style="text-align: center; width: 100%;" id="Video_A" src="" />
+    </div>
+    <div>
+      <img style="text-align: center; width: 100%;" id="Video_B" src="" />
+    </div>
+    <div>
+      <img style="text-align: center; width: 100%;" id="Audio" src="" />
+    </div>
+    <div style="padding: 10px 5%" id="Contradiction_handle">
+    </div>
+    <em
+      ><div
+        style="padding: 10px 5%; border-left: 3px #F9B418 solid; margin: 40px 5%; font-size:24px; line-height: 30px;"
+        id="Quote"
+      >
+      </div></em
+    >
+    <div style="padding: 10px 5% 40px; " id="Summary">
+    </div>
+    <div style="padding: 10px 5% 40px;">
+      Thanks for joining me today.<br /><br />
+      Good investing. <br /><br />
+      David Fessler <br />
+      March 2020<br /><br />
+      <img
+        style="max-width: 160px;"
+        src="https://images.ctfassets.net/sil3zm1l2d5y/4L57oWDycCDK4R36fAscWo/57708fdc37c51b5909dcac1571194993/Signature.png"
+      />
+    </div>
+    <div
+      style="display: block; margin: 0 auto; text-align: center; padding: 50px 0;"
+    >
+      <a
+        style="text-align: center; font-size: 20px; padding: 20px 20px; background-color: #F9B418; color: #000; margin: 0 auto; width: auto; border-radius: 4px;"
+        id="Button_A"
+        ></a
+      >
+    </div>
+  </div>
+  <div id="Winback" style="none;">
+    <div
+      style="background:#026390; padding: 10px 30px; margin: 10px auto; width:90%; text-align: center;"
+    >
+      <h3 style="color:#FFCE00; font-size: 24px; line-height: 30px;">
+        50% discount on our<br />lifetime membership
+      </h3>
+      <p style="color: #fff; font-size: 20px; line-height: 26px;">
+        Jake - as a valued Westoria customer, we’re offering you a 50% discount
+        on our lifetime membership. <br /><br />
+        One payment, unlimited access.
+      </p>
+    </div>
+  </div>
+  <div class="footer">
+    <img
+      style="width: 100%"
+      src="https://images.ctfassets.net/sil3zm1l2d5y/0tgyDsacR3XDd6kz42UUi/37d94e49ce8306202f0a15499fe72d5a/footer_mobile__1_.png"
+    />
+  </div>
+</div>
+</body></html>
